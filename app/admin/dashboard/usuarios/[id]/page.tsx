@@ -1,0 +1,80 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+
+export default function EditarUsuario() {
+  const router = useRouter();
+  const { id } = useParams();
+  const [usuario, setUsuario] = useState<any>(null);
+  const [mensaje, setMensaje] = useState('');
+
+  useEffect(() => {
+    const fetchUsuario = async () => {
+      const res = await fetch(`/api/usuarios/${id}`);
+      const data = await res.json();
+      setUsuario(data.usuario);
+    };
+    fetchUsuario();
+  }, [id]);
+
+  const handleChange = (e: any) => {
+    setUsuario({ ...usuario, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+    const res = await fetch(`/api/usuarios/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(usuario),
+    });
+    const data = await res.json();
+    setMensaje(data.message || data.error);
+    if (res.ok) {
+      setTimeout(() => {
+        router.push('/admin/dashboard/usuarios');
+      }, 1000);
+    }
+  };
+
+  if (!usuario) return <p className="text-sm">Cargando...</p>;
+
+  return (
+    <div className="max-w-xl mx-auto bg-white p-6 rounded shadow">
+      <h1 className="text-xl font-bold mb-4 text-[#1A3B1F]">Editar usuario</h1>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <input
+          type="text"
+          name="nombre"
+          value={usuario.nombre}
+          onChange={handleChange}
+          className="w-full border p-2 rounded"
+        />
+        <input
+          type="email"
+          name="email"
+          value={usuario.email}
+          onChange={handleChange}
+          className="w-full border p-2 rounded"
+        />
+        <select
+          name="rol"
+          value={usuario.rol}
+          onChange={handleChange}
+          className="w-full border p-2 rounded"
+        >
+          <option value="estudiante">Estudiante</option>
+          <option value="docente">Docente</option>
+          <option value="admin">Administrador</option>
+        </select>
+
+        {mensaje && <p className="text-sm text-center">{mensaje}</p>}
+
+        <button className="bg-[#1A3B1F] text-white px-4 py-2 rounded" type="submit">
+          Guardar cambios
+        </button>
+      </form>
+    </div>
+  );
+}
