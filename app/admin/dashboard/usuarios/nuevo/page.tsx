@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, ChangeEvent, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function CrearUsuario() {
@@ -14,30 +14,36 @@ export default function CrearUsuario() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  const handleChange = (e: any) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
     setSuccess('');
 
-    const res = await fetch('/api/usuarios', {
-      method: 'POST',
-      body: JSON.stringify(form),
-    });
+    try {
+      const res = await fetch('/api/usuarios', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
 
-    const data = await res.json();
-    if (!res.ok) {
-      setError(data.error || 'Error al crear el usuario');
-      return;
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || 'Error al crear el usuario');
+        return;
+      }
+
+      setSuccess('Usuario creado exitosamente');
+      setTimeout(() => {
+        router.push('/admin/dashboard/usuarios');
+      }, 1000);
+    } catch (err) {
+      setError('Ocurrió un error inesperado');
+      console.error('❌ Error creando usuario:', err);
     }
-
-    setSuccess('Usuario creado exitosamente');
-    setTimeout(() => {
-      router.push('/admin/dashboard/usuarios');
-    }, 1000);
   };
 
   return (

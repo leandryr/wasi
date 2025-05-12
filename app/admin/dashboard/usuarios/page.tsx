@@ -3,8 +3,15 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
+type Usuario = {
+  _id: string;
+  nombre: string;
+  email: string;
+  rol: 'admin' | 'docente' | 'estudiante';
+};
+
 export default function UsuariosPage() {
-  const [usuarios, setUsuarios] = useState([]);
+  const [usuarios, setUsuarios] = useState<Usuario[]>([]);
 
   useEffect(() => {
     const fetchUsuarios = async () => {
@@ -42,7 +49,7 @@ export default function UsuariosPage() {
           </tr>
         </thead>
         <tbody>
-          {usuarios.map((u: any) => (
+          {usuarios.map((u) => (
             <tr key={u._id} className="border-t">
               <td className="p-2">{u.nombre}</td>
               <td>{u.email}</td>
